@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>臺北市政府消防局 114年教育訓練管理系統 (藍色統一版)</title>
+    <title>臺北市政府消防局 114年教育訓練管理系統 (最終整合版)</title>
     <style>
         :root {
-            --sidebar-bg: #1e293b; /* 深藍灰側邊欄 */
+            --sidebar-bg: #1e293b;
             --active-item: #334155;
-            --accent: #3b82f6; /* 亮藍 */
+            --accent: #3b82f6;
             --bg-color: #f1f5f9;
             --border-color: #cbd5e1;
             --header-bg: #f8fafc;
@@ -81,7 +81,7 @@
         .workspace {
             flex: 1;
             padding: 20px;
-            overflow: hidden; /* 內部滾動 */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
@@ -108,7 +108,7 @@
         table {
             border-collapse: collapse;
             font-size: 13px;
-            table-layout: fixed; /* 關鍵 */
+            table-layout: fixed;
             width: 100%;
         }
 
@@ -132,7 +132,7 @@
             padding: 4px;
         }
 
-        /* 表頭文字置中 */
+        /* 表頭文字強制置中 */
         .th-content {
             display: flex;
             align-items: center;
@@ -163,6 +163,7 @@
             font-size: 13px;
         }
         input:focus { background-color: #eff6ff; box-shadow: inset 0 0 0 2px var(--accent); }
+        
         .align-left input { text-align: left; padding-left: 8px; }
 
         /* --- 日期與排除六日複合欄位 --- */
@@ -188,22 +189,40 @@
         .date-cell label:hover { background: #e2e8f0; color: #000; }
         .date-cell input[type="checkbox"] { width: auto; height: auto; margin-right: 4px; }
 
-        /* --- 仿 Excel 勾選框 --- */
-        .td-checkbox { text-align: center !important; vertical-align: middle !important; }
-        .excel-checkbox {
-            appearance: none; -webkit-appearance: none;
-            width: 18px; height: 18px;
-            border: 1px solid #333; background-color: white;
-            cursor: pointer; display: inline-block;
-            position: relative; vertical-align: middle; margin: 0;
+        /* --- 仿 Excel 勾選框 (您指定保留的完美版) --- */
+        .td-checkbox {
+            text-align: center !important;
+            vertical-align: middle !important;
+            padding: 0 !important;
         }
+        
+        .excel-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid #000; /* 深黑框 */
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            vertical-align: middle;
+            margin: 0;
+            border-radius: 0;
+        }
+        
         .excel-checkbox:checked::after {
-            content: '✓'; font-size: 14px; font-weight: 900; color: #000;
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            content: '✓';
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
         }
         .excel-checkbox:hover { background-color: #f1f5f9; }
 
-        /* --- 甘特圖樣式 (藍色統一版) --- */
+        /* --- 甘特圖樣式 (您指定保留的完美版) --- */
         .gantt-header-month td {
             background-color: #e2e8f0;
             font-weight: bold;
@@ -214,35 +233,25 @@
             color: #1e293b;
         }
 
-        .gantt-visual-row { height: 15px; }
+        .gantt-visual-row { height: 14px; }
         .gantt-data-row { height: 30px; }
 
+        /* 時間軸色塊 - 統一深灰色 */
         .gantt-cell-bar { border-right: 1px solid #e2e8f0; }
-        
-        /* 統一使用單一藍色色塊 */
-        .bar-active { 
-            background-color: #3b82f6; 
-            border: 1px solid #2563eb; 
-        }
+        .bar-active { background-color: #64748b; border-color: #475569; }
 
+        /* 數據格 */
         .gantt-num input { font-weight: bold; color: #0f172a; font-size: 12px; }
 
+        /* 每日統計列 */
         .stats-row td {
-            background-color: #f0f9ff; 
+            background-color: #f1f5f9;
             border-top: 2px double #94a3b8;
             border-bottom: 2px solid #333;
-            color: #0369a1;
+            color: #1e40af; /* 藍字突顯統計 */
             font-weight: bold;
             font-size: 12px;
             text-align: center;
-        }
-        
-        .gantt-name-cell {
-            background-color: #fff;
-            border-bottom: 2px solid #cbd5e1;
-            padding-left: 10px;
-            font-size: 12px;
-            vertical-align: middle;
         }
 
         /* --- 按鈕與色彩 --- */
@@ -386,7 +395,7 @@
 
             <!-- TAB 4: 甘特圖 -->
             <div id="view4" class="view-section">
-                <div style="padding:12px 16px; background:#fffbeb; border-bottom:1px solid #fbbf24; font-size:13px; color:#92400e;">
+                <div style="padding:12px; background:#fffbeb; border-bottom:1px solid #fbbf24; font-size:13px; color:#92400e;">
                     ⚠️ <strong>統計說明：</strong> 
                     統計範圍包含「附件1調用人數」+「附件2教官人數」+「附件3外勤人數」。
                     若在日期欄位勾選「排除六日」，甘特圖將自動跳過週六日不計入統計。
@@ -411,7 +420,6 @@
 
     <script>
         // --- 初始模擬資料 ---
-        // 欄位: exclude 代表是否排除六日
         let d1 = [
             {m:'1', unit:'訓練中心', name:'火災搶救初級班', date:'1/6-19', mp:20, exclude:true, ext:false},
             {m:'1', unit:'訓練中心', name:'112年警特班', date:'1/10-24', mp:4, exclude:false, ext:false}
@@ -436,13 +444,13 @@
             if(idx === 4) renderGantt();
         }
 
-        // --- 渲染 Table 1 ---
+        // --- 渲染 Table 1 (使用仿Excel Checkbox) ---
         function renderT1() {
             const tb = document.getElementById('tbody1');
             tb.innerHTML = '';
             d1.forEach((r, i) => {
                 tb.innerHTML += `<tr>
-                    <td><button onclick="del(1,${i})" style="width:100%;color:#9ca3af;background:none;border:none;cursor:pointer;">×</button></td>
+                    <td><button onclick="del(1,${i})" style="width:100%;color:#ccc;background:none;border:none;cursor:pointer;">×</button></td>
                     <td><input type="text" value="${i+1}" readonly style="color:#999"></td>
                     <td><input type="text" value="${r.m||''}" onchange="d1[${i}].m=this.value"></td>
                     <td><input type="text" value="${r.unit||''}" onchange="d1[${i}].unit=this.value"></td>
@@ -463,6 +471,7 @@
                     <td style="background:#f8fafc;text-align:center;line-height:36px;color:#64748b;">${(r.batch*r.bHour)||0}</td>
                     <td class="col-blue-light"><input type="number" value="${r.mp||''}" onchange="d1[${i}].mp=this.value" class="text-manpower"></td>
                     
+                    <!-- 仿 Excel 勾選框 -->
                     <td class="td-checkbox"><input type="checkbox" class="excel-checkbox" ${r.ext?'checked':''} onchange="d1[${i}].ext=this.checked"></td>
                     
                     <td><input type="number" value="${r.nt||''}" onchange="d1[${i}].nt=this.value"></td>
@@ -474,13 +483,13 @@
             });
         }
 
-        // --- 渲染 Table 2 ---
+        // --- 渲染 Table 2 (使用仿Excel Checkbox) ---
         function renderT2() {
             const tb = document.getElementById('tbody2');
             tb.innerHTML = '';
             d2.forEach((r, i) => {
                 tb.innerHTML += `<tr>
-                    <td><button onclick="del(2,${i})" style="width:100%;color:#9ca3af;background:none;border:none;cursor:pointer;">×</button></td>
+                    <td><button onclick="del(2,${i})" style="width:100%;color:#ccc;background:none;border:none;cursor:pointer;">×</button></td>
                     <td><input type="text" value="${i+1}" readonly style="color:#999"></td>
                     <td><input type="text" value="${r.m||''}" onchange="d2[${i}].m=this.value"></td>
                     <td><input type="text" value="${r.unit||''}" onchange="d2[${i}].unit=this.value"></td>
@@ -500,7 +509,10 @@
                     <td><input type="number" value="${r.bHour||''}" onchange="d2[${i}].bHour=this.value"></td>
                     <td style="background:#f8fafc;text-align:center;line-height:36px;color:#64748b;">${(r.batch*r.bHour)||0}</td>
                     <td><input type="number" value="${r.inst||''}" onchange="d2[${i}].inst=this.value"></td>
+                    
+                    <!-- 仿 Excel 勾選框 -->
                     <td class="td-checkbox"><input type="checkbox" class="excel-checkbox" ${r.ext?'checked':''} onchange="d2[${i}].ext=this.checked"></td>
+                    
                     <td class="align-left"><input type="text" value="${r.note||''}" onchange="d2[${i}].note=this.value"></td>
                 </tr>`;
             });
@@ -512,7 +524,7 @@
             tb.innerHTML = '';
             d3.forEach((r, i) => {
                 tb.innerHTML += `<tr>
-                    <td><button onclick="del(3,${i})" style="width:100%;color:#9ca3af;background:none;border:none;cursor:pointer;">×</button></td>
+                    <td><button onclick="del(3,${i})" style="width:100%;color:#ccc;background:none;border:none;cursor:pointer;">×</button></td>
                     <td><input type="text" value="${i+1}" readonly style="color:#999"></td>
                     <td><input type="text" value="${r.unit||''}" onchange="d3[${i}].unit=this.value"></td>
                     <td class="align-left"><input type="text" value="${r.name||''}" onchange="d3[${i}].name=this.value"></td>
@@ -531,7 +543,7 @@
             });
         }
 
-        // --- 甘特圖 (藍色統一色塊) ---
+        // --- 甘特圖 (完美版：月分組+獨立統計+排除六日) ---
         function renderGantt() {
             const header = document.getElementById('ganttHeader');
             header.innerHTML = '<th style="width:250px">班期 / 活動名稱</th>';
@@ -548,17 +560,28 @@
                     let s = str.replace(/\(.*\)/g, '').trim();
                     let rng = s.match(/(\d+)\/(\d+)-(\d+)/);
                     let sgl = s.match(/(\d+)\/(\d+)/);
+                    
                     let candidates = [];
-                    if(rng) { for(let i=+rng[2]; i<=+rng[3]; i++) candidates.push(i); } 
-                    else if(sgl) { candidates.push(+sgl[2]); } 
-                    else if(s.includes(',')) { s.split(',').forEach(p => { let m = p.match(/\d+$/); if(m) candidates.push(+m[0]); }); }
+                    if(rng) {
+                         for(let i=+rng[2]; i<=+rng[3]; i++) candidates.push(i);
+                    } else if(sgl) {
+                        candidates.push(+sgl[2]);
+                    } else if(s.includes(',')) {
+                        s.split(',').forEach(p => {
+                            let m = p.match(/\d+$/);
+                            if(m) candidates.push(+m[0]);
+                        });
+                    }
 
+                    // 排除六日邏輯 (2025年)
                     candidates.forEach(day => {
                         if(exclude) {
                             let dt = new Date(2025, month-1, day);
                             let wd = dt.getDay();
                             if(wd !== 0 && wd !== 6) days.push(day);
-                        } else { days.push(day); }
+                        } else {
+                            days.push(day);
+                        }
                     });
                 } catch(e){}
                 return days;
@@ -581,37 +604,37 @@
             for(let i=1; i<=12; i++) grouped[i] = [];
             allRows.forEach(r => { if(grouped[r.m]) grouped[r.m].push(r); });
 
-            // 4. 渲染
+            // 4. 渲染迴圈
             for(let m=1; m<=12; m++) {
                 if(grouped[m].length === 0) continue;
 
+                // 月份標題列
                 tbody.innerHTML += `<tr class="gantt-header-month"><td colspan="32">${m} 月份</td></tr>`;
+
                 let monthlySum = Array(32).fill(0);
 
                 grouped[m].forEach(r => {
-                    // 上列：統一藍色色塊
-                    let trVisual = `<tr>
-                        <td rowspan="2" class="gantt-name-cell">${r.n}</td>`;
+                    // 上列：灰色時間軸
+                    let trVisual = `<tr class="gantt-visual-row">
+                        <td style="border-right:1px solid #cbd5e1; border-bottom:none;"></td>`; 
                     
                     // 下列：數據
-                    let trData = `<tr>`;
+                    let trData = `<tr class="gantt-data-row">
+                        <td class="align-left" style="padding-left:10px; font-size:12px; border-top:none;">${r.n}</td>`;
 
                     for(let i=1; i<=31; i++) {
                         let active = r.ds.includes(i);
                         if(active) monthlySum[i] += parseInt(r.v);
 
-                        // 統一使用 bar-active (藍色)
-                        trVisual += `<td class="gantt-visual-row gantt-cell-bar ${active?'bar-active':''}"></td>`;
-                        
-                        trData += `<td class="gantt-data-row gantt-num" style="border-bottom:2px solid #cbd5e1;">
-                            ${active ? `<input type="text" value="${r.v}" readonly>` : ''}
-                        </td>`;
+                        trVisual += `<td class="gantt-cell-bar ${active?'bar-active':''}"></td>`;
+                        trData += `<td class="gantt-num">${active ? `<input type="text" value="${r.v}" readonly>` : ''}</td>`;
                     }
                     trVisual += '</tr>';
                     trData += '</tr>';
                     tbody.innerHTML += trVisual + trData;
                 });
 
+                // 該月獨立統計列
                 let trStats = `<tr class="stats-row"><td>每日調用人數統計</td>`;
                 for(let i=1; i<=31; i++) {
                     trStats += `<td>${monthlySum[i]>0 ? monthlySum[i] : ''}</td>`;
