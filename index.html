@@ -125,7 +125,7 @@
             box-shadow: inset 0 0 0 2px #3b82f6;
         }
 
-        /* --- 甘特圖暴力對齊 CSS (全部歸零，統一邊框) --- */
+        /* --- 甘特圖暴力對齊 CSS --- */
 
         /* 名稱欄：鎖死 300px */
         .col-fix-name {
@@ -151,7 +151,6 @@
             text-align: center;
             box-sizing: border-box;
             padding: 0 !important;
-            /* 關鍵：強制歸零 */
         }
 
         /* 確保標題列跟內容列的日期格完全一樣 */
@@ -844,7 +843,7 @@
             });
         }
 
-        // --- Gantt Chart Logic (Untouched Logic, new HTML structure for icon) ---
+        // --- Gantt Chart Logic ---
         function renderGantt() {
             const h = document.getElementById('ganttHeader');
             h.innerHTML = '<th class="col-fix-name">班期 / 活動名稱</th>';
@@ -913,12 +912,12 @@
             }
         }
 
-        // [新增] 全域變數
+        // 全域變數
         let currentEdit = null;
         let selectedDates = new Set();
         let currentCalendarMonth = 1;
 
-        // [新增] Modal 相關函式
+        // Modal 相關函式
         function openDateModal(t, i) {
             currentEdit = { t, i };
             const val = t === 1 ? d1[i].date : t === 2 ? d2[i].date : d3[i].date;
@@ -1060,7 +1059,7 @@
             closeModal('dateModal');
         }
 
-        // [新增] 列印 Modal 相關
+        // 列印 Modal 相關
         function openPrintModal(type) {
             printActionType = type;
             const grid = document.getElementById('printMonthGrid');
@@ -1094,55 +1093,76 @@
             }
         }
 
-        // [修改] 增強版 parseDateStr
+        // [修改] 增強版 parseDateStr：解決日期對不上的問題
         function parseDateStr(str, excludeList) {
-            let results = []; if (!str) return results;
+            let results = [];
+            if (!str) return results;
             try {
-                // 1. 全形轉半形
-                let s = str.replace(/[０-９]/g, d => "０１２３４５６７８９".indexOf(d))
-                    .replace(/（.*?）/g, '').replace(/\(.*?\)/g, '').trim();
+                // 1. 強力正規化：處理全形符號、移除括號、統一分隔符
+                let s = str.trim()
+                    .replace(/[０-９]/g, d => "０１２３４５６７８９".indexOf(d)) // 全形數字轉半形
+                    .replace(/（.*?）/g, '').replace(/\(.*?\)/g, '') // 移除括號備註
+                    .replace(/／/g, '/')   // 全形斜線 -> 半形
+                    .replace(/～/g, '-')   // 全形波浪 -> 減號
+                    .replace(/~/g, '-')    // 半形波浪 -> 減號
+                    .replace(/－/g, '-')   // 全形減號 -> 減號
+                    .trim();
 
-                // 2. 統一分隔符
-                let parts = s.split(/[,、，\s]+/); // 支援空格、逗號、頓號
+                // 2. 分割多組日期 (支援逗號、頓號、空格)
+                let parts = s.split(/[,、，\s]+/);
 
                 parts.forEach(part => {
                     part = part.trim();
                     if (!part) return;
 
-                    // 格式 A: m1/d1-m2/d2 (跨月)
-                    let cross = part.match(/(\d+)[\/\.](\d+)\s*[-~]\s*(\d+)[\/\.](\d+)/);
+                    // 3. 移除年份 (例如 "113/1/6" 或 "2025/1/6")
+                    part = part.replace(/^(\d{2,4})\//, '');
+
+                    // --- 解析邏輯 ---
+
+                    // 格式 A: 跨月 m1/d1-m2/d2 (例如 1/25-2/5)
+                    let cross = part.match(/(\d+)[\/\.](\d+)\s*[-]\s*(\d+)[\/\.](\d+)/);
                     if (cross) {
                         let m1 = +cross[1], d1 = +cross[2], m2 = +cross[3], d2 = +cross[4];
-                        let cur = new Date(2025, m1 - 1, d1), end = new Date(2025, m2 - 1, d2);
-                        while (cur <= end) {
-                            results.push({ m: cur.getMonth() + 1, d: cur.getDate() });
-                            cur.setDate(cur.getDate() + 1);
+                        let cur = new Date(2025, m1 - 1, d1);
+                        let end = new Date(2025, m2 - 1, d2);
+                        if (cur <= end) {
+                            while (cur <= end) {
+                                results.push({ m: cur.getMonth() + 1, d: cur.getDate() });
+                                cur.setDate(cur.getDate() + 1);
+                            }
                         }
                         return;
                     }
 
-                    // 格式 B: m/d1-d2 (同月範圍)
-                    let rng = part.match(/(\d+)[\/\.](\d+)\s*[-~]\s*(\d+)/);
+                    // 格式 B: 同月範圍 m/d1-d2 (例如 1/6-19)
+                    let rng = part.match(/(\d+)[\/\.](\d+)\s*[-]\s*(\d+)/);
                     if (rng) {
                         let m = +rng[1], d1 = +rng[2], d2 = +rng[3];
-                        // 防呆：如果 d2 小於 d1，可能是跨年或輸入錯誤，這裡假設是同月
                         if (d2 >= d1) {
                             for (let i = d1; i <= d2; i++) results.push({ m: m, d: i });
                         }
                         return;
                     }
 
-                    // 格式 C: m/d (單日)
+                    // 格式 C: 單日 m/d (例如 1/6)
                     let sgl = part.match(/(\d+)[\/\.](\d+)/);
-                    if (sgl) { results.push({ m: +sgl[1], d: +sgl[2] }); }
+                    if (sgl) {
+                        results.push({ m: +sgl[1], d: +sgl[2] });
+                    }
                 });
 
-                if (excludeList && excludeList.length > 0) results = results.filter(o => !excludeList.includes(o.d));
-            } catch (e) { console.error(e); }
+                if (excludeList && excludeList.length > 0) {
+                    results = results.filter(o => !excludeList.includes(o.d));
+                }
+
+            } catch (e) {
+                console.error("日期解析失敗:", e);
+            }
             return results;
         }
 
-        // [修改] 支援月份篩選的 PDF 下載
+        // 支援月份篩選的 PDF 下載
         function downloadPDF(selectedMonths) {
             const element = document.getElementById('ganttExportArea');
             const container = document.querySelector('.table-container');
@@ -1191,7 +1211,7 @@
                 });
         }
 
-        // [Excel 下載功能]
+        // Excel 下載功能
         async function exportExcelJS(selM) {
             const wb = new ExcelJS.Workbook(); const sh = wb.addWorksheet('甘特圖');
             sh.getColumn(1).width = 50; for (let k = 2; k <= 32; k++) sh.getColumn(k).width = 4;
