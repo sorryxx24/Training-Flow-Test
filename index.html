@@ -17,10 +17,8 @@
 
     <script>
         // ==========================================
-        // ⚠️ 1. 請填入您的流路管理 GAS 網址
+        // 系統設定
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxB06TURmbo4QW7ecb5OprxEF3mnJGve_Qkq64qvcyKTS0d4__4kmpzxFvJ9T6Cw0jKuQ/exec";
-        
-        // ⚠️ 2. 系統整合連結
         const PORTAL_URL = "https://sorryxx24.github.io/Linktest/";
         const OTHER_SYSTEM_URL = "https://sorryxx24.github.io/Facility-Booking-Test/";
         // ==========================================
@@ -30,51 +28,64 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: #f1f5f9; }
 
+        /* 表格容器 */
         .table-container { overflow-x: auto; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; }
         
-        /* 表格設定 */
+        /* 表格通用設定 */
         table { border-collapse: collapse; font-size: 13px; table-layout: fixed; width: auto; border-spacing: 0; }
         #table1 { min-width: 2000px; } #table2 { min-width: 1800px; } #table3 { min-width: 1400px; }
         
-        /* [修改 1] 解放甘特圖寬度，解決格子擠壓問題 */
-        #table4 { width: max-content !important; min-width: 1230px; } 
+        /* 
+           [修正重點 1] 甘特圖寬度與佈局設定 
+           強制使用 fixed layout，並給予固定寬度 (300 + 30*31 = 1230，給 1240 容錯)
+           這能確保 PDF 輸出時，標頭與內容欄位寬度嚴格一致，不會錯位。
+        */
+        #table4 { width: 1240px !important; min-width: 1240px; table-layout: fixed !important; } 
 
+        /* 儲存格設定 */
         th { background-color: #f8fafc; color: #334155; font-weight: 700; border: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 10; height: 45px; padding: 4px; box-sizing: border-box; white-space: nowrap; }
         td { border: 1px solid #cbd5e1; height: auto; min-height: 38px; background: white; position: relative; box-sizing: border-box; padding: 0; vertical-align: middle; }
         
+        /* 輸入框設定 */
         input[type="text"], input[type="number"] { width: 100%; height: 38px; border: none; outline: none; background: transparent; text-align: center; font-family: inherit; font-size: 13px; display: block; color: #334155; }
         input[type="text"]:focus, input[type="number"]:focus { background: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; }
         textarea { width: 100%; min-height: 38px; height: 100%; border: none; resize: none; outline: none; background: transparent; font-family: inherit; font-size: 13px; text-align: left; padding: 8px; box-sizing: border-box; white-space: pre-wrap; overflow: hidden; display: block; line-height: 1.4; }
         textarea:focus { background: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; }
 
-        /* [修改 2] 甘特圖樣式優化：統一邊框粗細 (解決對齊問題) */
+        /* --- 甘特圖關鍵修正 CSS (1px 邊框 + 固定寬度) --- */
         .col-fix-name { 
             width: 300px !important; min-width: 300px; max-width: 300px; 
             white-space: normal; word-break: break-all; line-height: 1.3; 
-            box-sizing: border-box; padding: 8px; /* 增加內距 */
-            border-right: 1px solid #000 !important; /* 統一為 1px */
+            box-sizing: border-box; padding: 8px;
+            border-right: 1px solid #000 !important; 
             border-bottom: 1px solid #000 !important;
-            vertical-align: middle !important; /* 垂直置中 */
+            vertical-align: middle !important;
+            background: #fff;
         }
         
-        .col-fix-day { width: 30px !important; min-width: 30px; max-width: 30px; text-align: center; padding: 0 !important; box-sizing: border-box; }
-        .gantt-visual-row, .gantt-data-row, .gantt-cell-bar, .gantt-num { height: 28px; line-height: 28px; }
-        .gantt-cell-bar { border-bottom: none; } .gantt-num { border-top: none; font-weight: bold; color: #000; font-size: 12px; }
+        /* 日期格子強制固定 30px，解決對齊問題 */
+        .col-fix-day { 
+            width: 30px !important; min-width: 30px; max-width: 30px; 
+            text-align: center; padding: 0 !important; box-sizing: border-box; 
+        }
+
+        .gantt-visual-row, .gantt-data-row { height: 28px; line-height: 28px; }
+        .gantt-cell-bar { border-bottom: none; height: 28px; } 
+        .gantt-num { border-top: none; font-weight: bold; color: #000; font-size: 12px; height: 28px; }
         .weekend { background-color: #f3f4f6; }
         .bar-active { background-color: #3b82f6 !important; border-color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         
-        /* 統一邊框為 1px */
         tbody.gantt-month-group { break-inside: avoid; page-break-inside: avoid; border-bottom: 1px solid #000; }
         .gantt-month-header td { background: #e2e8f0; font-weight: bold; padding-left: 15px; border: 1px solid #000; font-size: 14px; height: 32px; }
         .stats-row td { background-color: #f8fafc; border: 1px solid #000; color: #1e40af; font-weight: bold; text-align: center; }
 
-        /* 功能元件樣式 */
+        /* UI 元件 */
         .date-cell { display: flex; align-items: center; height: 100%; } .date-cell input { flex: 1; }
         .btn-calendar { width: 30px; height: 100%; min-height: 38px; border: none; border-left: 1px solid #cbd5e1; cursor: pointer; background: #f8fafc; color: #64748b; transition: 0.2s; }
         .btn-calendar:hover { background: #e2e8f0; color: #3b82f6; }
         .col-yellow { background: #ffffcc !important; } .col-blue-light { background: #e0f2fe !important; } .col-red-light { background: #fee2e2 !important; }
 
-        /* 日期選擇器 Modal 樣式 */
+        /* Modal */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 15px 0; }
         .day-btn { padding: 8px; border: 1px solid #e2e8f0; background: white; cursor: pointer; text-align: center; border-radius: 6px; font-size: 14px; }
         .day-btn.active.excluded { background: #64748b; color: white; text-decoration: line-through; border-color: #475569; }
@@ -89,6 +100,7 @@
         .spinner { width: 40px; height: 40px; border: 4px solid #fff; border-top-color: #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* 列印設定 */
         @media print {
             @page { size: A3 landscape; margin: 5mm; }
             body { background: white; height: auto; overflow: visible; display: block !important; }
@@ -107,6 +119,7 @@
 
     <div id="loading"><div class="spinner"></div><div id="loadText">處理中...</div></div>
 
+    <!-- Modal 區域 -->
     <div id="dateModal" class="fixed inset-0 bg-black/50 hidden z-[2000] justify-center items-center backdrop-blur-sm">
         <div class="bg-white w-[90%] max-w-[420px] p-6 rounded-2xl shadow-2xl">
             <h3 class="font-bold text-lg mb-2 text-slate-800">排除日期</h3>
@@ -140,6 +153,7 @@
         </div>
     </div>
 
+    <!-- 側邊欄 -->
     <aside id="sidebar" class="w-64 bg-slate-900 text-white hidden md:flex flex-col shadow-2xl z-30 transition-all duration-300">
         <div class="p-6 border-b border-slate-800 flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/50">
@@ -177,6 +191,7 @@
         </div>
     </aside>
 
+    <!-- 主內容 -->
     <main class="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-100">
         
         <div class="mobile-header bg-white md:hidden h-14 flex items-center justify-between px-4 shadow-sm border-b border-slate-200 z-20">
@@ -458,7 +473,6 @@
             });
         }
 
-        // --- [修改 3] 甘特圖產生邏輯更新：使用 rowspan 實現真正的合併儲存格 ---
         function renderGantt() {
             const h = document.getElementById('ganttHeader');
             h.innerHTML = '<th class="col-fix-name">班期 / 活動名稱</th>';
@@ -491,23 +505,29 @@
                 let sum = Array(32).fill(0);
 
                 grp[m].forEach(r => {
-                    // 第 1 列：包含合併的名稱欄位 (rowspan=2) + 藍色 Bar 區域
                     let row1 = `<tr class="gantt-visual-row">
                         <td class="col-fix-name" rowspan="2">${r.n}</td>`;
                     
-                    // 第 2 列：只包含數字區域 (名稱欄位因 rowspan 而跳過)
                     let row2 = `<tr class="gantt-data-row">`;
 
                     for(let i=1; i<=31; i++) {
                         let act = r.ds.includes(i), w = new Date(2025, m-1, i).getDay();
                         let wkCls = (w===0||w===6) ? 'weekend' : '';
-                        if(act) sum[i] += parseInt(r.v);
                         
-                        // 產生上方 Bar
+                        let val = parseInt(r.v);
+                        if(isNaN(val)) val = 0;
+                        if(act) sum[i] += val;
+                        
+                        // [修正 2] 顯示 0 的邏輯：
+                        // 只要有活動(act)，且數值不是空字串，且(數值大於0 OR 數值等於0 OR 字串等於'0')，就顯示
+                        let vShow = '';
+                        if (act) {
+                             if (r.v !== '' && r.v != null && (parseInt(r.v) > 0 || r.v == '0' || r.v === 0)) {
+                                 vShow = r.v;
+                             }
+                        }
+
                         row1 += `<td class="col-fix-day gantt-cell-bar ${wkCls} ${act?'bar-active':''}"></td>`;
-                        
-                        // 產生下方數字
-                        let vShow = (act && parseInt(r.v)>0) ? r.v : '';
                         row2 += `<td class="col-fix-day gantt-num ${wkCls}">${vShow}</td>`;
                     }
                     row1 += '</tr>';
@@ -545,51 +565,6 @@
                 if(excludeList && excludeList.length > 0) results = results.filter(o => !excludeList.includes(o.d));
             } catch(e) { console.error(e); }
             return results;
-        }
-
-        let curEdit=null;
-        function openDateModal(t,i) { curEdit={t,i}; let r=(t==1?d1:t==2?d2:d3)[i]; let rawDays = parseDateStr(r.date, []); if(rawDays.length==0) return alert('請先輸入正確日期'); let firstM = rawDays[0].m; let daysInM = rawDays.filter(o=>o.m===firstM).map(o=>o.d); document.getElementById('modalRangeText').innerText = `編輯月份: ${firstM}月 (僅支援首月排除)`; let grid=document.getElementById('calendarGrid'); grid.innerHTML=''; for(let d=1; d<=31; d++){ let btn=document.createElement('div'); btn.className='day-btn'; btn.innerText=d; if(daysInM.includes(d)) { btn.classList.add('active'); if((r.ex||[]).includes(d)) btn.classList.add('excluded'); btn.onclick = ()=> btn.classList.toggle('excluded'); } else btn.classList.add('disabled'); grid.appendChild(btn); } document.getElementById('dateModal').style.display='flex'; }
-        function closeModal(id) { document.getElementById(id).style.display='none'; }
-        function saveDateModal() { let ex = Array.from(document.querySelectorAll('#calendarGrid .day-btn.active.excluded')).map(b=>parseInt(b.innerText)); (curEdit.t==1?d1:curEdit.t==2?d2:d3)[curEdit.i].ex = ex; closeModal('dateModal'); renderAll(); }
-        function applyDateFilter(type) { let row=(curEdit.t==1?d1:curEdit.t==2?d2:d3)[curEdit.i]; let m=row.m?parseInt(row.m):1; document.querySelectorAll('#calendarGrid .day-btn.active').forEach(b=>{ let d=parseInt(b.innerText), dt=new Date(2025, m-1, d), w=dt.getDay(); if(type=='all') b.classList.remove('excluded'); if(type=='clear') b.classList.add('excluded'); if(type=='no-weekend') { if(w==0||w==6) b.classList.add('excluded'); else b.classList.remove('excluded'); } if(type=='only-weekend') { if(w==0||w==6) b.classList.remove('excluded'); else b.classList.add('excluded'); } }); }
-        
-        function openPrintModal(act) { printActionType=act; const grid=document.getElementById('printMonthGrid'); grid.innerHTML=''; for(let m=1;m<=12;m++){ let btn=document.createElement('div'); btn.className='month-select-btn selected'; btn.innerText=`${m} 月`; btn.dataset.m=m; btn.onclick=()=>btn.classList.toggle('selected'); grid.appendChild(btn); } document.getElementById('printModal').style.display='flex'; }
-        function toggleAllMonths(){ let all=document.querySelectorAll('.month-select-btn'); let hasUn=Array.from(all).some(b=>!b.classList.contains('selected')); all.forEach(b=>hasUn?b.classList.add('selected'):b.classList.remove('selected')); }
-        function executePrintOrExport() { let selected=Array.from(document.querySelectorAll('.month-select-btn.selected')).map(b=>b.dataset.m); closeModal('printModal'); for(let m=1;m<=12;m++){ let tb=document.getElementById(`month-${m}`); if(tb) tb.style.display=selected.includes(String(m))?'table-header-group':'none'; } if(printActionType==='download') { setTimeout(()=>{ downloadPDF(); }, 300); } else { exportExcelJS(selected); for(let m=1;m<=12;m++){let tb=document.getElementById(`month-${m}`);if(tb)tb.style.display='table-header-group';} } }
-
-        function downloadPDF() {
-            const element = document.getElementById('ganttExportArea');
-            const opt = { margin: 5, filename: '甘特圖報表.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, scrollY: 0 }, jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' } };
-            html2pdf().set(opt).from(element).save().then(() => { for(let m=1;m<=12;m++){let tb=document.getElementById(`month-${m}`);if(tb)tb.style.display='table-header-group';} });
-        }
-
-        async function exportExcelJS(selM) {
-            const wb = new ExcelJS.Workbook(); const sh = wb.addWorksheet('甘特圖');
-            sh.getColumn(1).width = 50; for(let k=2;k<=32;k++) sh.getColumn(k).width = 4;
-            sh.addRow(["班期 / 活動名稱", ...Array.from({length:31},(_,k)=>k+1)]).eachCell(c=>{c.font={bold:true};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFf8fafc'}};c.border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};c.alignment={horizontal:'center'}});
-            let rows=[]; const parse = (r) => parseDateStr(r.date, r.ex);
-            const add = (r,val,pre) => { let ds=parse(r), ms=[...new Set(ds.map(o=>o.m))].sort((a,b)=>a-b); ms.forEach(m=>{ rows.push({ m: m, n: `${r.date} ${r.name} ${val>0?`(${pre}${val}人)`:''}`, ds: ds.filter(o=>o.m==m).map(o=>o.d), v: val }); }); };
-            d1.forEach(r=>{if(r.date&&r.mp)add(r,r.mp,'調用')}); d2.forEach(r=>{if(r.date&&r.inst)add(r,r.inst,'教官')}); d3.forEach(r=>{if(r.date&&r.mp)add(r,r.mp,'調用')});
-            let grp={}; for(let i=1;i<=12;i++) grp[i]=[]; rows.forEach(r=>{if(grp[r.m])grp[r.m].push(r)});
-
-            selM.forEach(m => {
-                if(grp[m].length===0) return;
-                let mt = sh.addRow([`${m} 月份`]); mt.font={bold:true, size:12}; mt.getCell(1).fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFe2e8f0'}};
-                let sum=Array(32).fill(0);
-                grp[m].forEach(r => {
-                    let dVis=[r.n], dDat=[""];
-                    for(let i=1;i<=31;i++) { if(r.ds.includes(i)){ dVis.push(""); dDat.push(parseInt(r.v)>0?parseInt(r.v):""); sum[i]+=parseInt(r.v); } else { dVis.push(""); dDat.push(""); } }
-                    let rVis = sh.addRow(dVis); let rDat = sh.addRow(dDat);
-                    rVis.eachCell((c,col)=>{ c.border={right:{style:'thin'}}; if(col===1)c.alignment={horizontal:'left',vertical:'middle',wrapText:true}; if(col>1&&r.ds.includes(col-1))c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF3b82f6'}}; });
-                    rDat.eachCell((c,col)=>{ c.border={bottom:{style:'thick'},right:{style:'thin'},left:{style:'thin'}}; c.alignment={horizontal:'center'}; if(col===1) c.alignment={horizontal:'left',wrapText:true}; if(col>1&&r.ds.includes(col-1))c.font={bold:true}; });
-                    sh.mergeCells(rVis.number,1,rDat.number,1);
-                });
-                let sd=["每日統計"]; for(let i=1;i<=31;i++) sd.push(sum[i]);
-                let sr = sh.addRow(sd);
-                sr.eachCell((c)=>{ c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFf1f5f9'}}; c.font={bold:true,color:{argb:'FF1e40af'}}; c.border={top:{style:'double'},bottom:{style:'thick'},left:{style:'thin'},right:{style:'thin'}}; c.alignment={horizontal:'center'}; });
-                sh.addRow([]);
-            });
-            const buf=await wb.xlsx.writeBuffer(); saveAs(new Blob([buf]), "甘特圖報表.xlsx");
         }
 
         function delRow(t,i){let arr=t==1?d1:t==2?d2:d3;if(arr[i].isNew){arr.splice(i,1);renderAll();}else{if(prompt("輸入密碼 (119) 刪除:")==="119"){arr.splice(i,1);renderAll();}}}
