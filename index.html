@@ -17,10 +17,10 @@
 
     <script>
         // ==========================================
-        // ⚠️ 1. 請填入您的流路管理 GAS 網址 (已更新)
+        // ⚠️ 1. 請填入您的流路管理 GAS 網址 (修正為正確版本)
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbxB06TURmbo4QW7ecb5OprxEF3mnJGve_Qkq64qvcyKTS0d4__4kmpzxFvJ9T6Cw0jKuQ/exec";
         
-        // ⚠️ 2. 系統整合連結 (已更新)
+        // ⚠️ 2. 系統整合連結 (修正為正確版本)
         const PORTAL_URL = "https://sorryxx24.github.io/Linktest/";
         const OTHER_SYSTEM_URL = "https://sorryxx24.github.io/Facility-Booking-Test/";
         // ==========================================
@@ -39,8 +39,7 @@
         
         /* 
            [修正重點 1 - 螢幕顯示] 
-           使用 max-content 讓內容自動撐開，解決格線擠壓錯位問題。
-           這能確保螢幕上看到的線是直的。
+           使用 max-content 讓內容自動撐開，解決螢幕上格線擠壓錯位的問題。
         */
         #table4 { width: max-content !important; min-width: 1230px; } 
 
@@ -98,7 +97,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* 
-           [修正重點 2 - 列印設定] 
+           [修正重點 2 - 列印/PDF 設定] 
            恢復為 36cm (A3 橫向寬度)，這能確保 PDF 引擎正確計算寬度並成功下載。
            這是解決「下載功能失效」的關鍵。
         */
@@ -476,6 +475,7 @@
             });
         }
 
+        // --- Gantt Chart Logic (Untouched Logic, new HTML structure for icon) ---
         function renderGantt() {
             const h = document.getElementById('ganttHeader');
             h.innerHTML = '<th class="col-fix-name">班期 / 活動名稱</th>';
