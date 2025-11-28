@@ -22,7 +22,7 @@
         
         // ⚠️ 2. 系統整合連結
         const PORTAL_URL = "https://sorryxx24.github.io/Linktest/";
-        const OTHER_SYSTEM_URL = " https://sorryxx24.github.io/Facility-Booking-Test/";
+        const OTHER_SYSTEM_URL = "https://sorryxx24.github.io/Facility-Booking-Test/";
         // ==========================================
     </script>
 
@@ -31,42 +31,61 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
         body { font-family: 'Inter', 'Noto Sans TC', sans-serif; background-color: #f1f5f9; }
 
-        /* --- 表格核心樣式 (為了甘特圖與 A3 列印，必須保留部分自定義 CSS) --- */
+        /* --- 表格核心樣式 --- */
         .table-container { overflow-x: auto; background: #fff; border-radius: 8px; border: 1px solid #e2e8f0; }
         
         /* 表格結構設定 */
         table { border-collapse: collapse; font-size: 13px; table-layout: fixed; width: auto; border-spacing: 0; }
         #table1 { min-width: 2000px; } #table2 { min-width: 1800px; } #table3 { min-width: 1400px; }
         
-        /* 
-           ===== 修改重點 START ===== 
-           原本設定: width: 1230px !important;
-           修改說明: 改為 width: max-content，讓瀏覽器依照欄位總寬+邊框自動計算寬度，
-                    解決因邊框粗細不同導致的格線錯位問題。
-        */
+        /* 甘特圖寬度設定：維持 max-content 以確保有足夠空間 */
         #table4 { width: max-content !important; min-width: 1230px; } 
-        /* ===== 修改重點 END ===== */
 
         /* 表頭與儲存格 */
         th { background-color: #f8fafc; color: #334155; font-weight: 700; border: 1px solid #cbd5e1; position: sticky; top: 0; z-index: 10; height: 45px; padding: 4px; box-sizing: border-box; white-space: nowrap; }
         td { border: 1px solid #cbd5e1; height: auto; min-height: 38px; background: white; position: relative; box-sizing: border-box; padding: 0; vertical-align: middle; }
         
-        /* 輸入框美化 (移除預設邊框，讓它融入表格) */
+        /* 輸入框美化 */
         input[type="text"], input[type="number"] { width: 100%; height: 38px; border: none; outline: none; background: transparent; text-align: center; font-family: inherit; font-size: 13px; display: block; color: #334155; }
         input[type="text"]:focus, input[type="number"]:focus { background: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; }
         textarea { width: 100%; min-height: 38px; height: 100%; border: none; resize: none; outline: none; background: transparent; font-family: inherit; font-size: 13px; text-align: left; padding: 8px; box-sizing: border-box; white-space: pre-wrap; overflow: hidden; display: block; line-height: 1.4; }
         textarea:focus { background: #eff6ff; box-shadow: inset 0 0 0 2px #3b82f6; }
 
-        /* 甘特圖專用樣式 (不可刪除) */
-        .col-fix-name { width: 300px !important; min-width: 300px; max-width: 300px; white-space: normal; word-break: break-all; line-height: 1.3; box-sizing: border-box; padding: 5px; vertical-align: middle; border-right: 2px solid #000 !important; }
+        /* 
+           ===== 修改重點：甘特圖專用樣式 (統一邊框粗細) ===== 
+           原本有 2px, 3px 的邊框，現在全部改為 1px solid #000
+           這能確保 PDF 和網頁渲染時，不會因為線條寬度差異導致像素錯位。
+        */
+        .col-fix-name { 
+            width: 300px !important; min-width: 300px; max-width: 300px; 
+            white-space: normal; word-break: break-all; line-height: 1.3; 
+            box-sizing: border-box; padding: 5px; vertical-align: middle; 
+            border-right: 1px solid #000 !important; /* 修改：2px -> 1px */
+        }
+        
         .col-fix-day { width: 30px !important; min-width: 30px; max-width: 30px; text-align: center; padding: 0 !important; box-sizing: border-box; }
         .gantt-visual-row, .gantt-data-row, .gantt-cell-bar, .gantt-num { height: 28px; line-height: 28px; }
         .gantt-cell-bar { border-bottom: none; } .gantt-num { border-top: none; font-weight: bold; color: #000; font-size: 12px; }
         .weekend { background-color: #f3f4f6; }
         .bar-active { background-color: #3b82f6 !important; border-color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        tbody.gantt-month-group { break-inside: avoid; page-break-inside: avoid; border-bottom: 3px solid #000; }
-        .gantt-month-header td { background: #e2e8f0; font-weight: bold; padding-left: 15px; border: 2px solid #000; font-size: 14px; height: 32px; }
-        .stats-row td { background-color: #f8fafc; border: 2px solid #000; color: #1e40af; font-weight: bold; text-align: center; }
+        
+        tbody.gantt-month-group { 
+            break-inside: avoid; page-break-inside: avoid; 
+            border-bottom: 1px solid #000; /* 修改：3px -> 1px */
+        }
+        
+        .gantt-month-header td { 
+            background: #e2e8f0; font-weight: bold; padding-left: 15px; 
+            border: 1px solid #000; /* 修改：2px -> 1px */
+            font-size: 14px; height: 32px; 
+        }
+        
+        .stats-row td { 
+            background-color: #f8fafc; 
+            border: 1px solid #000; /* 修改：2px -> 1px */
+            color: #1e40af; font-weight: bold; text-align: center; 
+        }
+        /* ===== 修改結束 ===== */
 
         /* 功能元件樣式 */
         .date-cell { display: flex; align-items: center; height: 100%; } .date-cell input { flex: 1; }
